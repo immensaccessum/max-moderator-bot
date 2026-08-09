@@ -20,7 +20,7 @@
     "pm2:logs": "pm2 logs max-moderator-bot"
   },
   "dependencies": {
-    "@maxhub/max-bot-api": "^0.2.4",
+    "@maxhub/max-bot-api": "0.2.5",
     "better-sqlite3": "^12.11.1",
     "cors": "^2.8.6",
     "dotenv": "^16.4.7",

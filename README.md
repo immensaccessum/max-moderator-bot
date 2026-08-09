@@ -74,6 +74,10 @@ bash scripts/install-max-ca-certs.sh
 
 PM2 задаёт `NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt` в `ecosystem.config.cjs`.
 
+### Список чатов
+
+С июня 2026 Max API не отдаёт `GET /chats`. Бот запоминает групповые чаты из событий (`bot_added`, сообщения, смена названия). Кнопка «Обновить названия» в админке обновляет title через `GET /chats/{id}` для уже известных чатов.
+
 ## Бэкап базы
 
 На сервере:

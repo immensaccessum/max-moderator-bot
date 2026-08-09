@@ -13,6 +13,7 @@ const ALLOWED_UPDATES = [
   'message_removed',
   'bot_added',
   'bot_removed',
+  'chat_title_changed',
   'user_added',
   'user_removed',
 ] as const;

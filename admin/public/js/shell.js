@@ -156,7 +156,7 @@ export function createShell() {
       state.chats = data.chats ?? [];
       renderChatList();
       renderSelectedChat();
-      showToast(`Синхронизировано чатов: ${data.synced ?? 0}`);
+      showToast(`Обновлено: ${data.refreshed ?? 0}, пропущено: ${data.skipped ?? 0}`);
     } catch (error) {
       showToast(error.message, true);
     } finally {

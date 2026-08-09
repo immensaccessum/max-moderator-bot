@@ -1,5 +1,6 @@
 import type { Bot } from '@maxhub/max-bot-api';
 import { ensureChat, getChat, listChats } from '../../db/chats.js';
+import { refreshKnownChats } from '../../modules/chats/service.js';
 import { createLogger } from '../../utils/logger.js';
 import { getPresetLabel } from '../../modules/silence/constants.js';
 import { formatMinutesAsTime } from '../../modules/silence/schedule.js';
@@ -102,6 +103,8 @@ export async function listChatDtosForUser(bot: Bot, userId: number): Promise<Cha
         continue;
       }
 
+      ensureChat(chat.id, info.title);
+
       const { members } = await bot.api.getChatMembers(chat.id, {
         user_ids: [userId],
       });
@@ -117,20 +120,8 @@ export async function listChatDtosForUser(bot: Bot, userId: number): Promise<Cha
   return allowed;
 }
 
-export async function syncChatsFromBot(bot: Bot): Promise<{ synced: number }> {
-  let synced = 0;
-  let marker: number | null = null;
-
-  do {
-    const response = await bot.api.getAllChats(marker ? { marker } : {});
-    for (const chat of response.chats) {
-      if (chat.type === 'chat' && chat.status === 'active') {
-        ensureChat(chat.chat_id, chat.title);
-        synced += 1;
-      }
-    }
-    marker = response.marker;
-  } while (marker);
-
-  return { synced };
+export async function refreshKnownChatsFromBot(
+  bot: Bot,
+): Promise<{ refreshed: number; skipped: number }> {
+  return refreshKnownChats(bot);
 }

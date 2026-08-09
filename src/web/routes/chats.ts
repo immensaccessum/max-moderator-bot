@@ -2,7 +2,7 @@ import { Router } from 'express';
 import type { Bot } from '@maxhub/max-bot-api';
 import { parseChatId } from '../../utils/chat-id.js';
 import { requireChatAdmin } from '../middleware/require-chat-admin.js';
-import { syncChatsFromBot, toChatDto } from '../services/chats.js';
+import { refreshKnownChatsFromBot, toChatDto } from '../services/chats.js';
 import { resolveChatList } from './helpers.js';
 
 export function createChatsRouter(bot: Bot): Router {
@@ -20,7 +20,7 @@ export function createChatsRouter(bot: Bot): Router {
 
   router.post('/chats/sync', async (req, res, next) => {
     try {
-      const result = await syncChatsFromBot(bot);
+      const result = await refreshKnownChatsFromBot(bot);
       const chats = await resolveChatList(bot, req);
       res.json({ ...result, chats });
     } catch (err) {

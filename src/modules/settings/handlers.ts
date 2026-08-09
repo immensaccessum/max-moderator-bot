@@ -21,7 +21,7 @@ import {
   updateSilenceMessages,
   updateSilenceSchedule,
 } from '../silence/store.js';
-import { getAdminChats } from './chats.js';
+import { getAdminChats } from '../chats/service.js';
 import {
   buildChatPickerKeyboard,
   buildChatPickerText,

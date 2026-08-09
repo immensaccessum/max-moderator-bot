@@ -1,5 +1,6 @@
 import { Bot } from '@maxhub/max-bot-api';
 import { config } from './config.js';
+import { registerChatRegistryHandlers } from './modules/chats/handlers.js';
 import { registerCommands } from './handlers/commands.js';
 import { registerEventHandlers } from './handlers/events.js';
 import { registerSilenceHandlers, startSilenceExpiryWatcher } from './modules/silence/handlers.js';
@@ -33,6 +34,7 @@ export function createBot(): Bot {
     { name: 'ping', description: 'Проверка задержки бота' },
   ]);
 
+  registerChatRegistryHandlers(bot);
   registerCommands(bot);
   registerPingHandlers(bot);
   registerEventHandlers(bot);
@@ -46,7 +48,7 @@ export function createBot(): Bot {
   startScheduledDeletionsWatcher(bot);
 
   log.info('handlers registered', {
-    modules: ['settings', 'silence', 'triggers', 'autopost', 'deletion-log', 'scheduled-deletions', 'ping'],
+    modules: ['chats', 'settings', 'silence', 'triggers', 'autopost', 'deletion-log', 'scheduled-deletions', 'ping'],
   });
 
   return bot;
