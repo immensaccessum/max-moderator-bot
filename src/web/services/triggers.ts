@@ -5,6 +5,7 @@ import {
   listTriggers,
   updateTrigger,
 } from '../../modules/triggers/store.js';
+import { TRIGGER_MAX_RESPONSE_LENGTH } from '../../modules/triggers/constants.js';
 import type { TriggerAction, TriggerDto, TriggerMatchType } from '../../modules/triggers/types.js';
 import { createLogger } from '../../utils/logger.js';
 
@@ -20,6 +21,12 @@ export function mapTriggerError(err: unknown): { status: number; message: string
   }
   if (message === 'INVALID_REGEX') {
     return { status: 400, message: 'Некорректное регулярное выражение' };
+  }
+  if (message === 'RESPONSE_TOO_LONG') {
+    return {
+      status: 400,
+      message: `Текст ответа не длиннее ${TRIGGER_MAX_RESPONSE_LENGTH} символов`,
+    };
   }
   return null;
 }

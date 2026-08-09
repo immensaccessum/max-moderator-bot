@@ -4,6 +4,7 @@ import { authMiddleware } from '../middleware/auth.js';
 import { createAutopostRouter } from './autopost.js';
 import { createChatsRouter } from './chats.js';
 import { createDeletionLogRouter } from './deletion-log.js';
+import { createRssRouter } from './rss.js';
 import { createSilenceRouter } from './silence.js';
 import { createSystemRouter } from './system.js';
 import { createTriggersRouter } from './triggers.js';
@@ -17,6 +18,7 @@ export function createApiRouter(bot: Bot): Router {
   router.use(createChatsRouter(bot));
   router.use(createTriggersRouter(bot));
   router.use(createAutopostRouter(bot));
+  router.use(createRssRouter(bot));
   router.use(createDeletionLogRouter(bot));
 
   return router;

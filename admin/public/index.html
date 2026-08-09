@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Max Moderator — Админка</title>
-    <link rel="stylesheet" href="/styles.css?v=23" />
+    <link rel="stylesheet" href="/styles.css?v=31" />
     <script src="https://st.max.ru/js/max-web-app.js"></script>
   </head>
   <body>
@@ -16,9 +16,123 @@
         </div>
       </section>
 
+      <section id="landing-screen" class="screen hidden">
+        <div class="landing">
+          <header class="landing-hero card">
+            <div class="landing-hero-copy">
+              <p class="landing-kicker">Бот-модератор для Max</p>
+              <h1>Max Moderator</h1>
+              <p class="muted landing-lead">
+                Тишина по расписанию, автопостинг, RSS и триггеры — всё в одном боте для групповых чатов.
+              </p>
+              <div class="landing-hero-actions">
+                <a
+                  href="https://max.ru/id651800469306_1_bot"
+                  class="btn primary"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Открыть бота в Max
+                </a>
+              </div>
+              <div class="landing-status-pill" id="landing-status-pill">
+                <span class="status-dot" id="landing-status-dot"></span>
+                <span id="landing-status-text">Проверяем…</span>
+              </div>
+            </div>
+            <div class="landing-hero-panel card">
+              <div class="landing-panel-header">
+                <h2>Статус бота</h2>
+                <span class="badge" id="landing-version">—</span>
+              </div>
+              <dl class="landing-metrics">
+                <div>
+                  <dt>Время работы</dt>
+                  <dd id="landing-uptime">—</dd>
+                </div>
+                <div>
+                  <dt>Чатов</dt>
+                  <dd id="stat-chats">—</dd>
+                </div>
+                <div>
+                  <dt>Сейчас в тишине</dt>
+                  <dd id="stat-silence">—</dd>
+                </div>
+              </dl>
+              <p class="muted small" id="landing-checked-at">—</p>
+            </div>
+          </header>
+
+          <section class="landing-section">
+            <h2>Возможности</h2>
+            <div class="landing-features">
+              <article class="card landing-feature">
+                <h3>Тишина</h3>
+                <p class="muted">Ручной режим и расписание. Админы пишут, остальные — нет.</p>
+              </article>
+              <article class="card landing-feature">
+                <h3>Автопостинг</h3>
+                <p class="muted">Регулярные сообщения по расписанию без ручной рутины.</p>
+              </article>
+              <article class="card landing-feature">
+                <h3>RSS</h3>
+                <p class="muted">Новые записи из ленты автоматически попадают в чат.</p>
+              </article>
+              <article class="card landing-feature">
+                <h3>Триггеры</h3>
+                <p class="muted">Автоответы на фразы и регулярные выражения.</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="landing-section">
+            <h2>Активность</h2>
+            <div class="landing-stats-grid">
+              <article class="card landing-stat">
+                <p class="landing-stat-label">RSS-лент</p>
+                <p class="landing-stat-value" id="stat-rss">—</p>
+              </article>
+              <article class="card landing-stat">
+                <p class="landing-stat-label">Триггеров</p>
+                <p class="landing-stat-value" id="stat-triggers">—</p>
+              </article>
+              <article class="card landing-stat">
+                <p class="landing-stat-label">Автопостов</p>
+                <p class="landing-stat-value" id="stat-autoposts">—</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="landing-section card landing-steps">
+            <h2>Как подключить</h2>
+            <ol class="landing-step-list">
+              <li>
+                <a href="https://max.ru/id651800469306_1_bot" target="_blank" rel="noopener noreferrer"
+                  >Откройте бота</a
+                >
+                и добавьте его в групповой чат.
+              </li>
+              <li>
+                Без прав администратора бот может писать сообщения (автопост, RSS, ответы). Чтобы удалять чужие
+                сообщения в режиме тишины — добавьте бота в администраторы чата.
+              </li>
+              <li>Напишите боту в личку команду <code>/settings</code> для настройки.</li>
+            </ol>
+          </section>
+
+          <footer class="landing-footer">
+            <button type="button" class="btn secondary" id="landing-admin-login">Вход для админов</button>
+            <p class="muted small hidden" id="landing-admin-hint">
+              Токеновый вход отключён. Откройте админку из бота в Max.
+            </p>
+          </footer>
+        </div>
+      </section>
+
       <section id="login-screen" class="screen hidden">
         <div class="card login-card">
-          <h1>Max Moderator</h1>
+          <button type="button" class="btn ghost landing-back-btn" id="login-back-btn">← На главную</button>
+          <h1>Вход для админов</h1>
           <p class="muted">Введите токен доступа к веб-админке</p>
           <form id="login-form">
             <label for="token-input">Токен</label>
@@ -74,6 +188,9 @@
               </button>
               <button type="button" class="tab-btn" data-tab="autopost" role="tab" aria-selected="false">
                 Автопостинг
+              </button>
+              <button type="button" class="tab-btn" data-tab="rss" role="tab" aria-selected="false">
+                RSS
               </button>
               <button type="button" class="tab-btn" data-tab="triggers" role="tab" aria-selected="false">
                 Триггеры
@@ -176,6 +293,10 @@
                   Бот отправит сообщение в чат по расписанию: каждый день, раз в неделю
                   (например, каждый вторник) или с интервалом (например, каждые 2 часа).
                 </p>
+                <p class="content-notice small">
+                  Вы отвечаете за тексты автопостов. Бот публикует их от вашего имени — запрещён контент,
+                  нарушающий закон и правила Max.
+                </p>
 
                 <div id="autopost-list" class="item-list"></div>
                 <p id="autopost-empty" class="muted empty-hint hidden">Расписаний пока нет.</p>
@@ -187,7 +308,14 @@
                   <input id="autopost-title" type="text" placeholder="Например: Напоминание по вторникам" />
 
                   <label for="autopost-message">Текст сообщения</label>
-                  <textarea id="autopost-message" rows="4" placeholder="Текст, который бот отправит в чат" required></textarea>
+                  <textarea
+                    id="autopost-message"
+                    rows="4"
+                    maxlength="1000"
+                    placeholder="Текст, который бот отправит в чат"
+                    required
+                  ></textarea>
+                  <p class="muted small" id="autopost-message-counter">0 / 1000</p>
 
                   <label for="autopost-schedule-type">Тип расписания</label>
                   <select id="autopost-schedule-type">
@@ -242,12 +370,69 @@
               </div>
             </div>
 
+            <div id="tab-rss" class="tab-panel hidden" role="tabpanel">
+              <div class="feature-block">
+                <h3>RSS-ленты</h3>
+                <p class="muted small">
+                  Бот периодически проверяет RSS/Atom-ленту и публикует новые записи в чат.
+                  При первом включении фиксирует текущую запись без публикации.
+                  Кнопка «Тест» отправляет последнюю запись сразу, не меняя отсчёт новых.
+                  После 5 ошибок подряд лента отключается автоматически — включите снова вручную.
+                </p>
+                <p class="content-notice small">
+                  Вы отвечаете за содержимое подключаемых RSS-лент. Бот публикует записи в чат автоматически —
+                  убедитесь, что источник не нарушает закон и правила Max.
+                </p>
+
+                <div id="rss-list" class="item-list"></div>
+                <p id="rss-empty" class="muted empty-hint hidden">RSS-лент пока нет.</p>
+
+                <form id="rss-form" class="entity-form">
+                  <h4 id="rss-form-title">Новая RSS-лента</h4>
+
+                  <label for="rss-title">Название (необязательно)</label>
+                  <input id="rss-title" type="text" placeholder="Например: Новости сайта" />
+
+                  <label for="rss-url">URL ленты</label>
+                  <input id="rss-url" type="url" placeholder="https://example.com/feed.xml" required />
+
+                  <label for="rss-interval">Интервал проверки (минуты)</label>
+                  <input id="rss-interval" type="number" min="5" max="1440" value="15" required />
+                  <p class="muted small">От 5 минут до 24 часов.</p>
+
+                  <label class="checkbox-row" id="rss-post-latest-row">
+                    <input id="rss-post-latest" type="checkbox" />
+                    Опубликовать последнюю запись сразу при добавлении
+                  </label>
+
+                  <label class="checkbox-row">
+                    <input id="rss-include-description" type="checkbox" />
+                    Добавлять краткое описание записи
+                  </label>
+
+                  <label class="checkbox-row">
+                    <input id="rss-enabled" type="checkbox" checked />
+                    Включено
+                  </label>
+
+                  <div class="form-actions">
+                    <button type="submit" class="btn primary" id="rss-submit-btn">Добавить</button>
+                    <button type="button" class="btn ghost hidden" id="rss-cancel-btn">Отмена</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
             <div id="tab-triggers" class="tab-panel hidden" role="tabpanel">
               <div class="feature-block">
                 <h3>Триггеры</h3>
                 <p class="muted small">
                   Реакция на ключевую фразу в сообщении: ответ, удаление или удаление с пояснением.
                   Не срабатывает во время тишины для обычных участников.
+                </p>
+                <p class="content-notice small">
+                  Вы отвечаете за тексты триггеров. Запрещён контент, нарушающий закон и правила Max.
+                  Бот публикует ответы от вашего имени — за нарушения могут заблокировать бота.
                 </p>
 
                 <div id="trigger-list" class="item-list"></div>
@@ -274,8 +459,10 @@
                     <textarea
                       id="trigger-response"
                       rows="4"
+                      maxlength="1000"
                       placeholder="Например: Не пишите «Продано» — просто удалите неактуальное объявление"
                     ></textarea>
+                    <p class="muted small" id="trigger-response-counter">0 / 1000</p>
 
                     <label id="trigger-auto-delete-row" class="checkbox-row">
                       <input id="trigger-auto-delete-reply" type="checkbox" />
@@ -336,6 +523,6 @@
       </section>
     </div>
 
-    <script src="/app.js?v=23" type="module"></script>
+    <script src="/app.js?v=31" type="module"></script>
   </body>
 </html>

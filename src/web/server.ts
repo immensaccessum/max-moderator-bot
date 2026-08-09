@@ -5,6 +5,7 @@ import type { Bot } from '@maxhub/max-bot-api';
 import { config } from '../config.js';
 import { createLogger } from '../utils/logger.js';
 import { createApiRouter } from './routes/index.js';
+import { createPublicRouter } from './routes/public.js';
 import { requestLogMiddleware } from './middleware/request-log.js';
 
 const log = createLogger('web');
@@ -48,6 +49,7 @@ export function startWebServer(bot: Bot): Express | null {
   app.set('trust proxy', 1);
   app.use(cors({ origin: buildCorsOrigin(), credentials: true }));
   app.use(express.json());
+  app.use('/api/public', createPublicRouter());
   app.use('/api/v1', requestLogMiddleware, createApiRouter(bot));
   app.use(
     express.static(staticDir, {

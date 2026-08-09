@@ -1,6 +1,8 @@
 import { getSelectedChat } from '../../core/state.js';
 import { escapeHtml } from '../../core/ui.js';
 
+const MAX_MESSAGE_LENGTH = 1000;
+
 export function createAutopostModule({ api, showToast }) {
   const autopostList = document.getElementById('autopost-list');
   const autopostEmpty = document.getElementById('autopost-empty');
@@ -8,6 +10,7 @@ export function createAutopostModule({ api, showToast }) {
   const autopostFormTitle = document.getElementById('autopost-form-title');
   const autopostTitleInput = document.getElementById('autopost-title');
   const autopostMessageInput = document.getElementById('autopost-message');
+  const autopostMessageCounter = document.getElementById('autopost-message-counter');
   const autopostScheduleType = document.getElementById('autopost-schedule-type');
   const autopostWeeklyFields = document.getElementById('autopost-weekly-fields');
   const autopostTimeFields = document.getElementById('autopost-time-fields');
@@ -25,6 +28,12 @@ export function createAutopostModule({ api, showToast }) {
   let autoposts = [];
   /** @type {number | null} */
   let editingAutopostId = null;
+
+  function updateMessageCounter() {
+    const length = autopostMessageInput.value.length;
+    autopostMessageCounter.textContent = `${length} / ${MAX_MESSAGE_LENGTH}`;
+    autopostMessageCounter.classList.toggle('is-over', length > MAX_MESSAGE_LENGTH);
+  }
 
   function updateFormVisibility() {
     const type = autopostScheduleType.value;
@@ -53,6 +62,7 @@ export function createAutopostModule({ api, showToast }) {
     autopostSubmitBtn.textContent = 'Добавить';
     autopostCancelBtn.classList.add('hidden');
     updateFormVisibility();
+    updateMessageCounter();
   }
 
   function fillForm(item) {
@@ -70,6 +80,7 @@ export function createAutopostModule({ api, showToast }) {
     autopostSubmitBtn.textContent = 'Сохранить';
     autopostCancelBtn.classList.remove('hidden');
     updateFormVisibility();
+    updateMessageCounter();
     autopostForm.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
@@ -172,6 +183,11 @@ export function createAutopostModule({ api, showToast }) {
       return;
     }
 
+    if (payload.messageText.length > MAX_MESSAGE_LENGTH) {
+      showToast(`Текст сообщения не длиннее ${MAX_MESSAGE_LENGTH} символов`, true);
+      return;
+    }
+
     try {
       if (editingAutopostId) {
         await api(`/chats/${chat.id}/autoposts/${editingAutopostId}`, {
@@ -235,10 +251,12 @@ export function createAutopostModule({ api, showToast }) {
 
   function init() {
     autopostScheduleType.addEventListener('change', updateFormVisibility);
+    autopostMessageInput.addEventListener('input', updateMessageCounter);
     autopostForm.addEventListener('submit', (event) => {
       void save(event);
     });
     autopostCancelBtn.addEventListener('click', resetForm);
+    updateMessageCounter();
   }
 
   return {

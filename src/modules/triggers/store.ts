@@ -1,5 +1,6 @@
 import { getDb } from '../../db/index.js';
 import { ensureChat } from '../../db/chats.js';
+import { TRIGGER_MAX_RESPONSE_LENGTH } from './constants.js';
 import { validateRegexPattern } from './matcher.js';
 import {
   getTriggerActionLabel,
@@ -43,6 +44,11 @@ function validateTriggerInput(input: {
   const action = normalizeTriggerAction(input.action);
   if (action !== 'delete' && !input.responseText?.trim()) {
     throw new Error('RESPONSE_REQUIRED');
+  }
+
+  const responseText = input.responseText?.trim() ?? '';
+  if (responseText.length > TRIGGER_MAX_RESPONSE_LENGTH) {
+    throw new Error('RESPONSE_TOO_LONG');
   }
 
   const matchType = normalizeTriggerMatchType(input.matchType);

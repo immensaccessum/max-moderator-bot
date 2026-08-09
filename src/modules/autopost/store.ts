@@ -1,5 +1,6 @@
 import { getDb } from '../../db/index.js';
 import { ensureChat } from '../../db/chats.js';
+import { AUTOPOST_MAX_MESSAGE_LENGTH } from './constants.js';
 import { getTimezoneOrDefault } from '../silence/schedule.js';
 import { toAutopostDto } from './schedule.js';
 import type { AutopostDto, AutopostRow, AutopostScheduleType } from './types.js';
@@ -159,6 +160,10 @@ function validateAutopostInput(input: {
 }): void {
   if (!input.messageText.trim()) {
     throw new Error('MESSAGE_REQUIRED');
+  }
+
+  if (input.messageText.trim().length > AUTOPOST_MAX_MESSAGE_LENGTH) {
+    throw new Error('MESSAGE_TOO_LONG');
   }
 
   if (input.scheduleType === 'interval') {

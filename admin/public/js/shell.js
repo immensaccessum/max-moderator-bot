@@ -1,3 +1,4 @@
+import { createLanding } from './landing.js';
 import { clearToken, createApi, persistToken } from './core/api.js';
 import { state } from './core/state.js';
 import { createTabs } from './core/tabs.js';
@@ -5,6 +6,7 @@ import { buildHourMinuteOptions, createToast, escapeHtml, fillTimeSelects, forma
 import { createAutopostModule } from './modules/autopost/index.js';
 import { createDeletionLogModule } from './modules/deletion-log/index.js';
 import { createSilenceModule } from './modules/silence/index.js';
+import { createRssModule } from './modules/rss/index.js';
 import { createTriggersModule } from './modules/triggers/index.js';
 
 export function createShell() {
@@ -12,6 +14,7 @@ export function createShell() {
   const loginScreen = document.getElementById('login-screen');
   const mainScreen = document.getElementById('main-screen');
   const loginForm = document.getElementById('login-form');
+  const loginBackBtn = document.getElementById('login-back-btn');
   const tokenInput = document.getElementById('token-input');
   const loginError = document.getElementById('login-error');
   const logoutBtn = document.getElementById('logout-btn');
@@ -29,6 +32,7 @@ export function createShell() {
   const tabPanels = {
     silence: document.getElementById('tab-silence'),
     autopost: document.getElementById('tab-autopost'),
+    rss: document.getElementById('tab-rss'),
     triggers: document.getElementById('tab-triggers'),
     logger: document.getElementById('tab-logger'),
   };
@@ -44,10 +48,27 @@ export function createShell() {
     clearToken();
     state.selectedChatId = null;
     state.chats = [];
-    showLogin();
+    showLanding();
   }
 
   const api = createApi(logout);
+
+  const landing = createLanding({
+    onAdminLogin: () => {
+      showLogin();
+    },
+  });
+
+  function showLanding() {
+    loadingScreen.classList.add('hidden');
+    loginScreen.classList.add('hidden');
+    mainScreen.classList.add('hidden');
+    landing.show();
+  }
+
+  function hideLanding() {
+    landing.hide();
+  }
 
   function onChatUpdated(chat) {
     renderChatList();
@@ -56,6 +77,7 @@ export function createShell() {
 
   const silenceModule = createSilenceModule({ api, showToast, onChatUpdated });
   const autopostModule = createAutopostModule({ api, showToast });
+  const rssModule = createRssModule({ api, showToast });
   const triggersModule = createTriggersModule({ api, showToast });
   const deletionLogModule = createDeletionLogModule({ api, showToast });
 
@@ -66,12 +88,14 @@ export function createShell() {
   }
 
   function showLogin() {
+    hideLanding();
     loadingScreen.classList.add('hidden');
     loginScreen.classList.remove('hidden');
     mainScreen.classList.add('hidden');
   }
 
   function showMain() {
+    hideLanding();
     loadingScreen.classList.add('hidden');
     loginScreen.classList.add('hidden');
     mainScreen.classList.remove('hidden');
@@ -145,8 +169,14 @@ export function createShell() {
     renderChatList();
     renderSelectedChat();
     autopostModule.reset();
+    rssModule.reset();
     triggersModule.reset();
-    await Promise.all([autopostModule.load(), triggersModule.load(), deletionLogModule.load()]);
+    await Promise.all([
+      autopostModule.load(),
+      rssModule.load(),
+      triggersModule.load(),
+      deletionLogModule.load(),
+    ]);
   }
 
   async function syncChats() {
@@ -179,6 +209,9 @@ export function createShell() {
     tabButtons,
     tabPanels,
     onChange: (tab) => {
+      if (tab === 'rss') {
+        void rssModule.load().catch((error) => showToast(error.message, true));
+      }
       if (tab === 'logger') {
         void deletionLogModule.load().catch((error) => showToast(error.message, true));
       }
@@ -220,7 +253,7 @@ export function createShell() {
     }
 
     if (!state.token) {
-      showLogin();
+      showLanding();
       return;
     }
 
@@ -234,8 +267,10 @@ export function createShell() {
   }
 
   function init() {
+    landing.init();
     silenceModule.init();
     autopostModule.init();
+    rssModule.init();
     triggersModule.init();
     deletionLogModule.init();
     setActiveTab('silence');
@@ -257,6 +292,12 @@ export function createShell() {
         loginError.textContent = error.message;
         loginError.classList.remove('hidden');
       }
+    });
+
+    loginBackBtn.addEventListener('click', () => {
+      loginError.classList.add('hidden');
+      tokenInput.value = '';
+      showLanding();
     });
 
     logoutBtn.addEventListener('click', logout);

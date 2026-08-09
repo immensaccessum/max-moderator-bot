@@ -97,4 +97,24 @@ CREATE TABLE IF NOT EXISTS scheduled_deletions (
 );
 
 CREATE INDEX IF NOT EXISTS idx_scheduled_deletions_due ON scheduled_deletions(due_at);
+
+CREATE TABLE IF NOT EXISTS rss_feeds (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  chat_id INTEGER NOT NULL,
+  title TEXT,
+  feed_url TEXT NOT NULL,
+  poll_interval_minutes INTEGER NOT NULL DEFAULT 15,
+  include_description INTEGER NOT NULL DEFAULT 0,
+  enabled INTEGER NOT NULL DEFAULT 1,
+  last_item_key TEXT,
+  last_checked_at INTEGER,
+  last_posted_at INTEGER,
+  last_error TEXT,
+  failure_count INTEGER NOT NULL DEFAULT 0,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL,
+  FOREIGN KEY (chat_id) REFERENCES chats(chat_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_rss_feeds_chat_id ON rss_feeds(chat_id);
 `;

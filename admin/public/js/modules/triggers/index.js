@@ -13,6 +13,8 @@ const MATCH_LABELS = {
   regex: 'regex',
 };
 
+const MAX_RESPONSE_LENGTH = 1000;
+
 export function createTriggersModule({ api, showToast }) {
   const triggerList = document.getElementById('trigger-list');
   const triggerEmpty = document.getElementById('trigger-empty');
@@ -23,6 +25,7 @@ export function createTriggersModule({ api, showToast }) {
   const triggerAction = document.getElementById('trigger-action');
   const triggerResponseBlock = document.getElementById('trigger-response-block');
   const triggerResponseInput = document.getElementById('trigger-response');
+  const triggerResponseCounter = document.getElementById('trigger-response-counter');
   const triggerAutoDeleteReplyInput = document.getElementById('trigger-auto-delete-reply');
   const triggerMatchType = document.getElementById('trigger-match-type');
   const triggerCaseSensitiveInput = document.getElementById('trigger-case-sensitive');
@@ -34,6 +37,12 @@ export function createTriggersModule({ api, showToast }) {
   let triggers = [];
   /** @type {number | null} */
   let editingTriggerId = null;
+
+  function updateResponseCounter() {
+    const length = triggerResponseInput.value.length;
+    triggerResponseCounter.textContent = `${length} / ${MAX_RESPONSE_LENGTH}`;
+    triggerResponseCounter.classList.toggle('is-over', length > MAX_RESPONSE_LENGTH);
+  }
 
   function updateFormVisibility() {
     const needsResponse = triggerAction.value !== 'delete';
@@ -58,6 +67,7 @@ export function createTriggersModule({ api, showToast }) {
     triggerSubmitBtn.textContent = 'Добавить';
     triggerCancelBtn.classList.add('hidden');
     updateFormVisibility();
+    updateResponseCounter();
   }
 
   function fillForm(item) {
@@ -73,6 +83,7 @@ export function createTriggersModule({ api, showToast }) {
     triggerSubmitBtn.textContent = 'Сохранить';
     triggerCancelBtn.classList.remove('hidden');
     updateFormVisibility();
+    updateResponseCounter();
     triggerForm.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
@@ -177,6 +188,11 @@ export function createTriggersModule({ api, showToast }) {
       return;
     }
 
+    if (action !== 'delete' && payload.responseText.length > MAX_RESPONSE_LENGTH) {
+      showToast(`Текст ответа не длиннее ${MAX_RESPONSE_LENGTH} символов`, true);
+      return;
+    }
+
     try {
       if (editingTriggerId) {
         await api(`/chats/${chat.id}/triggers/${editingTriggerId}`, {
@@ -234,11 +250,13 @@ export function createTriggersModule({ api, showToast }) {
   function init() {
     triggerAction.addEventListener('change', updateFormVisibility);
     triggerMatchType.addEventListener('change', updateFormVisibility);
+    triggerResponseInput.addEventListener('input', updateResponseCounter);
     triggerForm.addEventListener('submit', (event) => {
       void save(event);
     });
     triggerCancelBtn.addEventListener('click', resetForm);
     updateFormVisibility();
+    updateResponseCounter();
   }
 
   return {

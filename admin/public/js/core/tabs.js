@@ -2,7 +2,7 @@ import { state } from './state.js';
 
 export function createTabs({ tabButtons, tabPanels, onChange }) {
   function setActiveTab(tab) {
-    if (tab !== 'silence' && tab !== 'autopost' && tab !== 'triggers' && tab !== 'logger') {
+    if (tab !== 'silence' && tab !== 'autopost' && tab !== 'rss' && tab !== 'triggers' && tab !== 'logger') {
       return;
     }
 

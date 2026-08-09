@@ -1,4 +1,5 @@
 import { ensureChat } from '../../db/chats.js';
+import { MAX_OUTBOUND_TEXT_LENGTH } from '../../constants/outbound-text.js';
 import {
   DEFAULT_DURATION_PRESETS,
   getPresetLabel,
@@ -120,6 +121,8 @@ export function getSilenceMeta() {
       endMinutes: 9 * 60,
       label: formatScheduleRange(21 * 60, 9 * 60),
     },
+    triggerMaxResponseLength: MAX_OUTBOUND_TEXT_LENGTH,
+    autopostMaxMessageLength: MAX_OUTBOUND_TEXT_LENGTH,
   };
 }
 

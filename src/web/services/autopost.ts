@@ -4,6 +4,7 @@ import {
   listAutoposts,
   updateAutopost,
 } from '../../modules/autopost/store.js';
+import { AUTOPOST_MAX_MESSAGE_LENGTH } from '../../modules/autopost/constants.js';
 import type { AutopostDto, AutopostScheduleType } from '../../modules/autopost/types.js';
 import { createLogger } from '../../utils/logger.js';
 
@@ -13,6 +14,12 @@ export function mapAutopostError(err: unknown): { status: number; message: strin
   const message = err instanceof Error ? err.message : String(err);
   if (message === 'MESSAGE_REQUIRED') {
     return { status: 400, message: 'Введите текст сообщения' };
+  }
+  if (message === 'MESSAGE_TOO_LONG') {
+    return {
+      status: 400,
+      message: `Текст сообщения не длиннее ${AUTOPOST_MAX_MESSAGE_LENGTH} символов`,
+    };
   }
   if (message === 'INVALID_INTERVAL') {
     return { status: 400, message: 'Интервал: от 5 минут до 7 суток' };

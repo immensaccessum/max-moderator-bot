@@ -10,6 +10,7 @@ import { registerTriggerHandlers } from './modules/triggers/handlers.js';
 import { startAutopostWatcher } from './modules/autopost/watcher.js';
 import { startDeletionLogPurgeWatcher } from './modules/deletion-log/watcher.js';
 import { registerPingHandlers } from './modules/ping/handlers.js';
+import { startRssWatcher } from './modules/rss/watcher.js';
 import { startScheduledDeletionsWatcher } from './modules/scheduled-deletions/watcher.js';
 import { createLogger } from './utils/logger.js';
 
@@ -44,11 +45,12 @@ export function createBot(): Bot {
   startSilenceExpiryWatcher(bot);
   startMinuteScheduleWatcher(bot);
   startAutopostWatcher(bot);
+  startRssWatcher(bot);
   startDeletionLogPurgeWatcher();
   startScheduledDeletionsWatcher(bot);
 
   log.info('handlers registered', {
-    modules: ['chats', 'settings', 'silence', 'triggers', 'autopost', 'deletion-log', 'scheduled-deletions', 'ping'],
+    modules: ['chats', 'settings', 'silence', 'triggers', 'autopost', 'rss', 'deletion-log', 'scheduled-deletions', 'ping'],
   });
 
   return bot;
