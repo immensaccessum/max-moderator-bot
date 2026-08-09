@@ -1,5 +1,5 @@
 import { createLanding } from './landing.js';
-import { clearToken, createApi, persistToken } from './core/api.js';
+import { createApi } from './core/api.js';
 import { state } from './core/state.js';
 import { createTabs } from './core/tabs.js';
 import { buildHourMinuteOptions, createToast, escapeHtml, fillTimeSelects, formatSilence } from './core/ui.js';
@@ -11,12 +11,7 @@ import { createTriggersModule } from './modules/triggers/index.js';
 
 export function createShell() {
   const loadingScreen = document.getElementById('loading-screen');
-  const loginScreen = document.getElementById('login-screen');
   const mainScreen = document.getElementById('main-screen');
-  const loginForm = document.getElementById('login-form');
-  const loginBackBtn = document.getElementById('login-back-btn');
-  const tokenInput = document.getElementById('token-input');
-  const loginError = document.getElementById('login-error');
   const logoutBtn = document.getElementById('logout-btn');
   const userInfo = document.getElementById('user-info');
   const syncBtn = document.getElementById('sync-btn');
@@ -38,6 +33,7 @@ export function createShell() {
   };
 
   const showToast = createToast(toast);
+  const landing = createLanding();
 
   function logout() {
     if (state.miniAppMode) {
@@ -45,7 +41,6 @@ export function createShell() {
       return;
     }
 
-    clearToken();
     state.selectedChatId = null;
     state.chats = [];
     showLanding();
@@ -53,15 +48,8 @@ export function createShell() {
 
   const api = createApi(logout);
 
-  const landing = createLanding({
-    onAdminLogin: () => {
-      showLogin();
-    },
-  });
-
   function showLanding() {
     loadingScreen.classList.add('hidden');
-    loginScreen.classList.add('hidden');
     mainScreen.classList.add('hidden');
     landing.show();
   }
@@ -83,25 +71,17 @@ export function createShell() {
 
   function showLoading() {
     loadingScreen.classList.remove('hidden');
-    loginScreen.classList.add('hidden');
     mainScreen.classList.add('hidden');
-  }
-
-  function showLogin() {
     hideLanding();
-    loadingScreen.classList.add('hidden');
-    loginScreen.classList.remove('hidden');
-    mainScreen.classList.add('hidden');
   }
 
   function showMain() {
     hideLanding();
     loadingScreen.classList.add('hidden');
-    loginScreen.classList.add('hidden');
     mainScreen.classList.remove('hidden');
-    logoutBtn.classList.toggle('hidden', state.miniAppMode);
+    logoutBtn.classList.add('hidden');
 
-    if (state.miniAppMode && state.currentUser?.displayName) {
+    if (state.currentUser?.displayName) {
       userInfo.textContent = `Вы вошли как ${state.currentUser.displayName}`;
       userInfo.classList.remove('hidden');
     } else {
@@ -155,6 +135,7 @@ export function createShell() {
     state.timezones = data.timezones ?? [];
     await silenceModule.loadMeta(state.timezones);
     autopostModule.loadMeta(state.timezones);
+    deletionLogModule.loadMeta(state.timezones, data.defaultTimezone);
   }
 
   async function loadChats() {
@@ -220,85 +201,45 @@ export function createShell() {
 
   async function bootstrap() {
     const webApp = window.WebApp;
-    if (webApp?.initData) {
-      state.miniAppMode = true;
-      state.initData = webApp.initData;
-      showLoading();
-      webApp.ready?.();
-      webApp.expand?.();
-
-      try {
-        await api('/health');
-        await loadProfile();
-        showMain();
-        try {
-          await Promise.all([loadMeta(), loadChats()]);
-        } catch (loadError) {
-          showToast(
-            loadError instanceof Error
-              ? loadError.message
-              : 'Не удалось загрузить данные чатов',
-            true,
-          );
-        }
-      } catch (error) {
-        showLogin();
-        loginError.textContent =
-          error instanceof Error
-            ? error.message
-            : 'Не удалось войти через MAX. Откройте админку из бота.';
-        loginError.classList.remove('hidden');
-      }
-      return;
-    }
-
-    if (!state.token) {
+    if (!webApp?.initData) {
       showLanding();
       return;
     }
 
+    state.miniAppMode = true;
+    state.initData = webApp.initData;
+    showLoading();
+    webApp.ready?.();
+    webApp.expand?.();
+
     try {
       await api('/health');
+      await loadProfile();
       showMain();
-      await Promise.all([loadMeta(), loadChats()]);
-    } catch {
-      logout();
+      try {
+        await Promise.all([loadMeta(), loadChats()]);
+      } catch (loadError) {
+        showToast(
+          loadError instanceof Error ? loadError.message : 'Не удалось загрузить данные чатов',
+          true,
+        );
+      }
+    } catch (error) {
+      showLanding();
+      showToast(
+        error instanceof Error ? error.message : 'Откройте настройки кнопкой слева от поля ввода в чате с ботом',
+        true,
+      );
     }
   }
 
   function init() {
-    landing.init();
     silenceModule.init();
     autopostModule.init();
     rssModule.init();
     triggersModule.init();
     deletionLogModule.init();
     setActiveTab('silence');
-
-    loginForm.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      loginError.classList.add('hidden');
-
-      const token = tokenInput.value.trim();
-      if (!token) return;
-
-      try {
-        persistToken(token);
-        await api('/health');
-        showMain();
-        await Promise.all([loadMeta(), loadChats()]);
-      } catch (error) {
-        clearToken();
-        loginError.textContent = error.message;
-        loginError.classList.remove('hidden');
-      }
-    });
-
-    loginBackBtn.addEventListener('click', () => {
-      loginError.classList.add('hidden');
-      tokenInput.value = '';
-      showLanding();
-    });
 
     logoutBtn.addEventListener('click', logout);
     syncBtn.addEventListener('click', () => {

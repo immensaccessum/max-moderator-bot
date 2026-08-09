@@ -12,11 +12,7 @@ import {
 
 const log = createLogger('silence');
 
-async function handleSilenceMessage(
-  ctx: Context,
-  bot: Bot,
-  eventType: 'message_created' | 'message_edited',
-): Promise<boolean> {
+async function handleSilenceMessage(ctx: Context, bot: Bot): Promise<boolean> {
   if (!ctx.chatId || !isGroupMessage(ctx)) {
     return false;
   }
@@ -51,8 +47,7 @@ async function handleSilenceMessage(
       userLabel: formatSenderLabel(sender),
       messageText: ctx.message?.body?.text ?? null,
       source: 'silence',
-      sourceDetail: eventType === 'message_edited' ? 'Редактирование во время тишины' : null,
-      eventType,
+      eventType: 'message_created',
     },
   );
 
@@ -61,13 +56,7 @@ async function handleSilenceMessage(
 
 export function registerSilenceHandlers(bot: Bot): void {
   bot.on('message_created', async (ctx, next) => {
-    const handled = await handleSilenceMessage(ctx, bot, 'message_created');
-    if (handled) return;
-    return next();
-  });
-
-  bot.on('message_edited', async (ctx, next) => {
-    const handled = await handleSilenceMessage(ctx, bot, 'message_edited');
+    const handled = await handleSilenceMessage(ctx, bot);
     if (handled) return;
     return next();
   });

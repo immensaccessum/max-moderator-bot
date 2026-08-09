@@ -54,5 +54,4 @@ export type DeletionLogDto = {
   success: boolean;
   errorMessage: string | null;
   deletedAt: number;
-  deleted: string;
 };

@@ -1,10 +1,11 @@
-import { state, TOKEN_KEY } from './state.js';
+import { state } from './state.js';
 
 export function getAuthHeaders() {
-  if (state.miniAppMode && state.initData) {
-    return { Authorization: `tma ${state.initData}` };
+  if (!state.initData) {
+    return {};
   }
-  return { Authorization: `Bearer ${state.token}` };
+
+  return { Authorization: `tma ${state.initData}` };
 }
 
 /** @type {(onLogout: () => void) => Promise<any>} */
@@ -21,28 +22,14 @@ export function createApi(onLogout) {
 
     if (response.status === 401) {
       onLogout();
-      throw new Error('Сессия истекла, войдите снова');
+      throw new Error('Сессия истекла, откройте настройки снова из Max');
     }
 
     const data = await response.json().catch(() => ({}));
-    if (response.status === 503 && data.error === 'Web admin auth is not configured') {
-      throw new Error('Токеновый вход отключён на сервере. Откройте админку из MAX.');
-    }
-
     if (!response.ok) {
       throw new Error(data.error ?? 'Ошибка запроса');
     }
 
     return data;
   };
-}
-
-export function persistToken(token) {
-  state.token = token;
-  localStorage.setItem(TOKEN_KEY, token);
-}
-
-export function clearToken() {
-  state.token = null;
-  localStorage.removeItem(TOKEN_KEY);
 }

@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Max Moderator — Админка</title>
-    <link rel="stylesheet" href="/styles.css?v=31" />
+    <link rel="stylesheet" href="/styles.css?v=34" />
     <script src="https://st.max.ru/js/max-web-app.js"></script>
   </head>
   <body>
@@ -116,36 +116,11 @@
                 Без прав администратора бот может писать сообщения (автопост, RSS, ответы). Чтобы удалять чужие
                 сообщения в режиме тишины — добавьте бота в администраторы чата.
               </li>
-              <li>Напишите боту в личку команду <code>/settings</code> для настройки.</li>
+              <li>
+                Админы чата настраивают бота кнопкой слева от поля ввода в личке с ботом.
+              </li>
             </ol>
           </section>
-
-          <footer class="landing-footer">
-            <button type="button" class="btn secondary" id="landing-admin-login">Вход для админов</button>
-            <p class="muted small hidden" id="landing-admin-hint">
-              Токеновый вход отключён. Откройте админку из бота в Max.
-            </p>
-          </footer>
-        </div>
-      </section>
-
-      <section id="login-screen" class="screen hidden">
-        <div class="card login-card">
-          <button type="button" class="btn ghost landing-back-btn" id="login-back-btn">← На главную</button>
-          <h1>Вход для админов</h1>
-          <p class="muted">Введите токен доступа к веб-админке</p>
-          <form id="login-form">
-            <label for="token-input">Токен</label>
-            <input
-              id="token-input"
-              type="password"
-              autocomplete="current-password"
-              placeholder="WEB_ADMIN_TOKEN"
-              required
-            />
-            <button type="submit" class="btn primary">Войти</button>
-          </form>
-          <p id="login-error" class="error hidden"></p>
         </div>
       </section>
 
@@ -497,13 +472,13 @@
 
             <div id="tab-logger" class="tab-panel hidden" role="tabpanel">
               <div class="feature-block">
-                <div class="logger-header">
-                  <div>
-                    <h3>Удалённые сообщения</h3>
-                    <p class="muted small">
-                      История удалений ботом за последние 48 часов: тишина, триггеры, команды и служебные.
-                    </p>
-                  </div>
+                <h3>Удалённые сообщения</h3>
+                <p class="muted small">
+                  История удалений ботом за последние 48 часов: тишина, триггеры, команды и служебные.
+                </p>
+                <div class="logger-toolbar">
+                  <label for="logger-timezone">Часовой пояс</label>
+                  <select id="logger-timezone"></select>
                   <button type="button" class="btn secondary" id="logger-refresh-btn">Обновить</button>
                 </div>
 
@@ -523,6 +498,6 @@
       </section>
     </div>
 
-    <script src="/app.js?v=31" type="module"></script>
+    <script src="/app.js?v=34" type="module"></script>
   </body>
 </html>

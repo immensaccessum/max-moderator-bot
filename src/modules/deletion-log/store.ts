@@ -34,7 +34,6 @@ function toDto(row: DeletionLogRow): DeletionLogDto {
     success: row.success === 1,
     errorMessage: row.error_message,
     deletedAt: row.deleted_at,
-    deleted: new Date(row.deleted_at).toLocaleString('ru-RU'),
   };
 }
 

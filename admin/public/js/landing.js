@@ -12,7 +12,7 @@ function formatCheckedAt(timestamp) {
   });
 }
 
-export function createLanding({ onAdminLogin }) {
+export function createLanding() {
   const landingScreen = document.getElementById('landing-screen');
   const statusDot = document.getElementById('landing-status-dot');
   const statusText = document.getElementById('landing-status-text');
@@ -24,8 +24,6 @@ export function createLanding({ onAdminLogin }) {
   const statRss = document.getElementById('stat-rss');
   const statTriggers = document.getElementById('stat-triggers');
   const statAutoposts = document.getElementById('stat-autoposts');
-  const adminLoginBtn = document.getElementById('landing-admin-login');
-  const adminHint = document.getElementById('landing-admin-hint');
 
   /** @type {ReturnType<typeof setInterval> | null} */
   let refreshTimer = null;
@@ -42,10 +40,6 @@ export function createLanding({ onAdminLogin }) {
     statRss.textContent = formatNumber(data.stats.rssFeeds);
     statTriggers.textContent = formatNumber(data.stats.triggers);
     statAutoposts.textContent = formatNumber(data.stats.autoposts);
-
-    const adminAvailable = Boolean(data.adminLoginAvailable);
-    adminLoginBtn.classList.toggle('hidden', !adminAvailable);
-    adminHint.classList.toggle('hidden', adminAvailable);
   }
 
   async function loadStats() {
@@ -79,12 +73,5 @@ export function createLanding({ onAdminLogin }) {
     }
   }
 
-  function init() {
-    adminLoginBtn.addEventListener('click', () => {
-      hide();
-      onAdminLogin();
-    });
-  }
-
-  return { init, show, hide, loadStats };
+  return { show, hide, loadStats };
 }

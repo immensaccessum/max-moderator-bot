@@ -1,7 +1,6 @@
 import { createRequire } from 'node:module';
 import { listChats } from '../../db/chats.js';
 import { getDb } from '../../db/index.js';
-import { config } from '../../config.js';
 import { isSilenceActive } from '../../modules/silence/service.js';
 import { formatUptime } from '../../utils/uptime.js';
 
@@ -26,7 +25,6 @@ export type PublicStatusDto = {
     autoposts: number;
     silenceActive: number;
   };
-  adminLoginAvailable: boolean;
 };
 
 export function getPublicStatus(): PublicStatusDto {
@@ -54,6 +52,5 @@ export function getPublicStatus(): PublicStatusDto {
       autoposts: countRows('SELECT COUNT(*) AS count FROM autopost_schedules WHERE enabled = 1'),
       silenceActive,
     },
-    adminLoginAvailable: Boolean(config.web.adminToken),
   };
 }

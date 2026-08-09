@@ -5,7 +5,6 @@ import { registerCommands } from './handlers/commands.js';
 import { registerEventHandlers } from './handlers/events.js';
 import { registerSilenceHandlers, startSilenceExpiryWatcher } from './modules/silence/handlers.js';
 import { startMinuteScheduleWatcher } from './modules/silence/schedule-watcher.js';
-import { registerSettingsHandlers } from './modules/settings/handlers.js';
 import { registerTriggerHandlers } from './modules/triggers/handlers.js';
 import { startAutopostWatcher } from './modules/autopost/watcher.js';
 import { startDeletionLogPurgeWatcher } from './modules/deletion-log/watcher.js';
@@ -31,7 +30,6 @@ export function createBot(): Bot {
     { name: 'start', description: 'Информация о боте' },
     { name: 'help', description: 'Справка по командам' },
     { name: 'myid', description: 'Узнать свой user_id' },
-    { name: 'settings', description: 'Настройки чата (админы)' },
     { name: 'ping', description: 'Проверка задержки бота' },
   ]);
 
@@ -39,7 +37,6 @@ export function createBot(): Bot {
   registerCommands(bot);
   registerPingHandlers(bot);
   registerEventHandlers(bot);
-  registerSettingsHandlers(bot);
   registerSilenceHandlers(bot);
   registerTriggerHandlers(bot);
   startSilenceExpiryWatcher(bot);
@@ -50,7 +47,7 @@ export function createBot(): Bot {
   startScheduledDeletionsWatcher(bot);
 
   log.info('handlers registered', {
-    modules: ['chats', 'settings', 'silence', 'triggers', 'autopost', 'rss', 'deletion-log', 'scheduled-deletions', 'ping'],
+    modules: ['chats', 'silence', 'triggers', 'autopost', 'rss', 'deletion-log', 'scheduled-deletions', 'ping'],
   });
 
   return bot;

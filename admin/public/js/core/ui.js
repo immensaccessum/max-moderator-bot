@@ -6,6 +6,18 @@ export function escapeHtml(value) {
     .replaceAll('"', '&quot;');
 }
 
+export function formatZonedDateTime(timestamp, timezone) {
+  return new Date(timestamp).toLocaleString('ru-RU', {
+    timeZone: timezone,
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+}
+
 export function formatSilence(chat) {
   const { silence } = chat;
 

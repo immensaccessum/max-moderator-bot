@@ -466,12 +466,20 @@ input:not([type='checkbox']):not([type='radio']):focus {
   color: #ffadb5;
 }
 
-.logger-header {
+.logger-toolbar {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  align-items: flex-end;
   gap: 12px;
   flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.logger-toolbar label {
+  margin: 0;
+}
+
+.logger-toolbar select {
+  min-width: 220px;
 }
 
 .status-badge {
