@@ -1,0 +1,17 @@
+---
+description: Деплой, сервер и операционные правила
+alwaysApply: true
+---
+
+# Деплой и операционка
+
+- Прод-настройки — в локальном `.env.deploy` (не коммитить). Шаблон: `.env.deploy.example`.
+- Деплой: `bash scripts/deploy.sh`. Перед деплоем — `npm run build` локально (падение сборки = не деплоим).
+- База на сервере — основная. Локальная `data/bot.db` заливается ТОЛЬКО с явным `DEPLOY_DB=1` (перезапишет прод!).
+- `.env` на сервере генерируется деплой-скриптом из локального `.env` — новые переменные окружения добавлять и в `scripts/deploy.sh`, и в `.env.example`.
+- После изменения фронтенда админки бампать версию в `admin/public/index.html`: `app.js?v=N` и `styles.css?v=N`.
+- Предупреждения Hestia в конце деплоя (`named: command not found`, `apache2 restart failed`) — известные, не блокируют.
+- Логи прода: `pm2 logs max-moderator-bot` на сервере (через ssh). Уровень — `LOG_LEVEL` в `.env`.
+- Секреты (пароли, токены, IP, домены) не хардкодить в коде и скриптах — только через `.env` / `.env.deploy`.
+- Max API (`platform-api2.max.ru`) требует сертификаты Минцифры: `bash scripts/install-max-ca-certs.sh` на сервере; `NODE_EXTRA_CA_CERTS` задан в `ecosystem.config.cjs`.
+- Бэкап БД: cron с `BACKUP_DIR=...` и `scripts/backup-db.sh`, ротация 7 дней.

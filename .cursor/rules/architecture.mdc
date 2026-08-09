@@ -1,0 +1,46 @@
+---
+description: Архитектура проекта и структура модулей max-moderator-bot
+alwaysApply: true
+---
+
+# Архитектура max-moderator-bot
+
+Бот-модератор для Max (@maxhub/max-bot-api) + веб-админка (mini-app). Node 18+, TypeScript ESM, better-sqlite3, Express 5, PM2.
+
+## Симметричная структура — соблюдать при добавлении модулей
+
+Каждая фича — модуль, зеркалируемый в трёх местах:
+
+```
+src/modules/<name>/        бот-логика: handlers.ts, store.ts, service.ts, types.ts, watcher.ts
+src/web/routes/<name>.ts   Express-роуты (только парсинг/валидация запроса)
+src/web/services/<name>.ts прослойка роут → modules/<name>/store
+admin/public/js/modules/<name>/index.js  вкладка в админке
+```
+
+Регистрация нового модуля:
+1. `src/bot.ts` — вызвать `register<Name>Handlers(bot)` и/или `start<Name>Watcher()`, добавить имя в лог `handlers registered`
+2. `src/web/routes/index.ts` — подключить роутер
+3. `admin/public/js/shell.js` + `index.html` — вкладка (если есть UI)
+4. Команды бота — в `bot.api.setMyCommands` и в текст `/help` (`src/handlers/commands.ts`)
+
+## Слои и их обязанности
+
+- **store.ts** — единственное место с SQL. Возвращает DTO (camelCase), строки БД (snake_case) наружу не отдавать.
+- **service.ts** — бизнес-логика, не знает про Express и Context.
+- **handlers.ts** — только разбор апдейта и вызов service/store. В цепочке `message_created` обязательно вызывать `next()`, если сообщение не обработано.
+- **web/routes** — валидация входа, маппинг ошибок (`mapXxxError`), никакого SQL.
+
+## База данных
+
+- SQLite через `getDb()` из `src/db/index.ts`. Схема для новых установок — `src/db/schema.ts`, изменения — ТОЛЬКО добавлением в конец массива `MIGRATIONS` в `src/db/migrations.ts` (и продублировать в schema.ts).
+- У всех таблиц FK на `chats(chat_id)` — перед вставкой с chat_id вызывать `ensureChat(chatId)`, иначе FOREIGN KEY constraint failed.
+- В личках (`chat_type === 'dialog'`) chat_id в таблицу chats НЕ писать — методы чатов Max API для диалогов не работают.
+
+## Обязательные паттерны
+
+- Любое удаление сообщения ботом — через `deleteAndRecord()` из `src/modules/deletion-log/service.js` (пишет в логгер админки). Новый источник — добавить в `DeletionSource` + `DELETION_SOURCE_LABELS` + `normalizeDeletionSource` в `src/modules/deletion-log/types.ts`.
+- Отложенное автоудаление — через `scheduleAutoDeleteMessage()` из `src/modules/deletion-log/schedule.ts`, не писать свои setTimeout-обёртки.
+- Логирование — только `createLogger('<module>')` из `src/utils/logger.ts`. `console.log/error` запрещены.
+- Импорты внутри src — с расширением `.js` (ESM NodeNext).
+- Тексты пользователю (бот и админка) — на русском.

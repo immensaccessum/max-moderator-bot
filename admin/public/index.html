@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Max Moderator — Админка</title>
+    <link rel="stylesheet" href="/styles.css?v=21" />
+    <script src="https://st.max.ru/js/max-web-app.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <section id="loading-screen" class="screen hidden">
+        <div class="card login-card">
+          <h1>Max Moderator</h1>
+          <p class="muted">Загрузка…</p>
+        </div>
+      </section>
+
+      <section id="login-screen" class="screen hidden">
+        <div class="card login-card">
+          <h1>Max Moderator</h1>
+          <p class="muted">Введите токен доступа к веб-админке</p>
+          <form id="login-form">
+            <label for="token-input">Токен</label>
+            <input
+              id="token-input"
+              type="password"
+              autocomplete="current-password"
+              placeholder="WEB_ADMIN_TOKEN"
+              required
+            />
+            <button type="submit" class="btn primary">Войти</button>
+          </form>
+          <p id="login-error" class="error hidden"></p>
+        </div>
+      </section>
+
+      <section id="main-screen" class="screen hidden">
+        <header class="topbar">
+          <div>
+            <h1>Админка бота</h1>
+            <p class="muted">Тишина, автопостинг и триггеры</p>
+            <p id="user-info" class="user-info hidden"></p>
+          </div>
+          <div class="topbar-actions">
+            <button id="sync-btn" class="btn secondary">Синхронизировать чаты</button>
+            <button id="logout-btn" class="btn ghost">Выйти</button>
+          </div>
+        </header>
+
+        <main class="layout">
+          <aside class="sidebar card">
+            <div class="sidebar-header">
+              <h2>Чаты</h2>
+              <span id="chat-count" class="badge">0</span>
+            </div>
+            <div id="chat-list" class="chat-list"></div>
+            <p id="chat-list-empty" class="muted empty-hint hidden">
+              Чатов пока нет. Нажмите «Синхронизировать чаты».
+            </p>
+          </aside>
+
+          <section id="chat-panel" class="content card hidden">
+            <div class="panel-header">
+              <div>
+                <h2 id="panel-title">Чат</h2>
+                <p id="panel-subtitle" class="muted"></p>
+              </div>
+            </div>
+
+            <nav class="panel-tabs" role="tablist" aria-label="Разделы настроек">
+              <button type="button" class="tab-btn active" data-tab="silence" role="tab" aria-selected="true">
+                Тишина
+              </button>
+              <button type="button" class="tab-btn" data-tab="autopost" role="tab" aria-selected="false">
+                Автопостинг
+              </button>
+              <button type="button" class="tab-btn" data-tab="triggers" role="tab" aria-selected="false">
+                Триггеры
+              </button>
+              <button type="button" class="tab-btn" data-tab="logger" role="tab" aria-selected="false">
+                Логгер
+              </button>
+            </nav>
+
+            <div class="tab-panels">
+            <div id="tab-silence" class="tab-panel" role="tabpanel">
+            <div class="silence-overview">
+              <span id="silence-badge" class="status-badge">—</span>
+              <p id="silence-status" class="silence-status">—</p>
+            </div>
+            <div id="silence-block" class="silence-block">
+              <h3>Ручная тишина</h3>
+              <p id="manual-mode-hint" class="muted small">
+                Можно включить вручную, пока чат открыт.
+              </p>
+
+              <div class="duration-grid" id="duration-grid"></div>
+
+              <form id="custom-duration-form" class="inline-form">
+                <label for="custom-minutes">Своё время (минуты)</label>
+                <div class="inline-form-row">
+                  <input id="custom-minutes" type="number" min="1" max="43200" placeholder="90" />
+                  <button type="submit" class="btn secondary">Включить</button>
+                </div>
+              </form>
+
+              <button id="disable-silence-btn" class="btn danger" disabled>
+                Выключить ручную тишину
+              </button>
+            </div>
+
+            <div id="schedule-block" class="schedule-block">
+              <h3>Расписание (ежедневно)</h3>
+              <p id="schedule-mode-hint" class="muted small">
+                Например: с 21:00 до 09:00 и закрыто в выходные.
+                Изменения сохраняются автоматически.
+              </p>
+
+              <label class="checkbox-row">
+                <input id="schedule-enabled" type="checkbox" />
+                Включить расписание
+              </label>
+
+              <label class="checkbox-row">
+                <input id="schedule-weekends-enabled" type="checkbox" />
+                Закрывать в выходные (суббота и воскресенье)
+              </label>
+
+              <div class="schedule-times">
+                <div class="field">
+                  <span class="field-label">Закрыт с</span>
+                  <div class="time-selects">
+                    <select id="schedule-start-hour" aria-label="Час начала закрытия"></select>
+                    <span class="time-colon" aria-hidden="true">:</span>
+                    <select id="schedule-start-minute" aria-label="Минуты начала закрытия"></select>
+                  </div>
+                </div>
+                <div class="field">
+                  <span class="field-label">Закрыт до</span>
+                  <div class="time-selects">
+                    <select id="schedule-end-hour" aria-label="Час окончания закрытия"></select>
+                    <span class="time-colon" aria-hidden="true">:</span>
+                    <select id="schedule-end-minute" aria-label="Минуты окончания закрытия"></select>
+                  </div>
+                </div>
+              </div>
+
+              <label for="schedule-timezone">Часовой пояс</label>
+              <select id="schedule-timezone"></select>
+
+              <p id="schedule-status" class="muted small">—</p>
+              <p id="schedule-save-status" class="schedule-save-status">—</p>
+            </div>
+
+            <div class="messages-block">
+              <h3>Приписки к сообщениям в чат</h3>
+              <p class="muted small">
+                Добавляются к основному сообщению «чат открыт» / «чат закрыт» при включении и выключении тишины.
+              </p>
+
+              <label for="open-suffix">При открытии чата</label>
+              <textarea id="open-suffix" rows="3" placeholder="Например: Пишите по делу, без флуда"></textarea>
+
+              <label for="closed-suffix">При закрытии чата</label>
+              <textarea id="closed-suffix" rows="3" placeholder="Например: Обсуждение продолжим завтра в 10:00"></textarea>
+
+              <button id="save-messages-btn" class="btn secondary">Сохранить приписки</button>
+            </div>
+            </div>
+
+            <div id="tab-autopost" class="tab-panel hidden" role="tabpanel">
+              <div class="feature-block">
+                <h3>Расписание публикаций</h3>
+                <p class="muted small">
+                  Бот отправит сообщение в чат по расписанию: каждый день, раз в неделю
+                  (например, каждый вторник) или с интервалом (например, каждые 2 часа).
+                </p>
+
+                <div id="autopost-list" class="item-list"></div>
+                <p id="autopost-empty" class="muted empty-hint hidden">Расписаний пока нет.</p>
+
+                <form id="autopost-form" class="entity-form">
+                  <h4 id="autopost-form-title">Новое расписание</h4>
+
+                  <label for="autopost-title">Название (необязательно)</label>
+                  <input id="autopost-title" type="text" placeholder="Например: Напоминание по вторникам" />
+
+                  <label for="autopost-message">Текст сообщения</label>
+                  <textarea id="autopost-message" rows="4" placeholder="Текст, который бот отправит в чат" required></textarea>
+
+                  <label for="autopost-schedule-type">Тип расписания</label>
+                  <select id="autopost-schedule-type">
+                    <option value="daily">Каждый день</option>
+                    <option value="weekly">Раз в неделю</option>
+                    <option value="interval">С интервалом</option>
+                  </select>
+
+                  <div id="autopost-weekly-fields" class="form-row hidden">
+                    <label for="autopost-weekday">День недели</label>
+                    <select id="autopost-weekday">
+                      <option value="0">Понедельник</option>
+                      <option value="1">Вторник</option>
+                      <option value="2">Среда</option>
+                      <option value="3">Четверг</option>
+                      <option value="4">Пятница</option>
+                      <option value="5">Суббота</option>
+                      <option value="6">Воскресенье</option>
+                    </select>
+                  </div>
+
+                  <div id="autopost-time-fields" class="form-row">
+                    <div class="field">
+                      <span class="field-label">Время</span>
+                      <div class="time-selects">
+                        <select id="autopost-hour" aria-label="Час"></select>
+                        <span class="time-colon" aria-hidden="true">:</span>
+                        <select id="autopost-minute" aria-label="Минуты"></select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div id="autopost-interval-fields" class="form-row hidden">
+                    <label for="autopost-interval">Интервал (минуты)</label>
+                    <input id="autopost-interval" type="number" min="5" max="10080" placeholder="120" />
+                    <p class="muted small">От 5 минут до 7 суток. Например: 120 = каждые 2 часа.</p>
+                  </div>
+
+                  <label for="autopost-timezone">Часовой пояс</label>
+                  <select id="autopost-timezone"></select>
+
+                  <label class="checkbox-row">
+                    <input id="autopost-enabled" type="checkbox" checked />
+                    Включено
+                  </label>
+
+                  <div class="form-actions">
+                    <button type="submit" class="btn primary" id="autopost-submit-btn">Добавить</button>
+                    <button type="button" class="btn ghost hidden" id="autopost-cancel-btn">Отмена</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <div id="tab-triggers" class="tab-panel hidden" role="tabpanel">
+              <div class="feature-block">
+                <h3>Триггеры</h3>
+                <p class="muted small">
+                  Реакция на ключевую фразу в сообщении: ответ, удаление или удаление с пояснением.
+                  Не срабатывает во время тишины для обычных участников.
+                </p>
+
+                <div id="trigger-list" class="item-list"></div>
+                <p id="trigger-empty" class="muted empty-hint hidden">Триггеров пока нет.</p>
+
+                <form id="trigger-form" class="entity-form">
+                  <h4 id="trigger-form-title">Новый триггер</h4>
+
+                  <label for="trigger-key">Ключевая фраза</label>
+                  <input id="trigger-key" type="text" placeholder="Например: Продано" required />
+                  <p id="trigger-key-hint" class="muted small hidden">
+                    Regex в формате JavaScript. Пример: <code>^продано$</code> или <code>продан[оа]</code>
+                  </p>
+
+                  <label for="trigger-action">Действие</label>
+                  <select id="trigger-action">
+                    <option value="reply">Ответить в чат</option>
+                    <option value="delete">Удалить сообщение (молча)</option>
+                    <option value="delete_reply">Удалить сообщение и ответить</option>
+                  </select>
+
+                  <div id="trigger-response-block">
+                    <label for="trigger-response">Ответ бота</label>
+                    <textarea
+                      id="trigger-response"
+                      rows="4"
+                      placeholder="Например: Не пишите «Продано» — просто удалите неактуальное объявление"
+                    ></textarea>
+
+                    <label id="trigger-auto-delete-row" class="checkbox-row">
+                      <input id="trigger-auto-delete-reply" type="checkbox" />
+                      Удалять ответ бота через 1 минуту
+                    </label>
+                  </div>
+
+                  <label for="trigger-match-type">Тип совпадения</label>
+                  <select id="trigger-match-type">
+                    <option value="contains">Содержит фразу</option>
+                    <option value="exact">Точное совпадение</option>
+                    <option value="regex">Регулярное выражение (regex)</option>
+                  </select>
+
+                  <label class="checkbox-row">
+                    <input id="trigger-case-sensitive" type="checkbox" />
+                    Учитывать регистр
+                  </label>
+
+                  <label class="checkbox-row">
+                    <input id="trigger-enabled" type="checkbox" checked />
+                    Включено
+                  </label>
+
+                  <div class="form-actions">
+                    <button type="submit" class="btn primary" id="trigger-submit-btn">Добавить</button>
+                    <button type="button" class="btn ghost hidden" id="trigger-cancel-btn">Отмена</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <div id="tab-logger" class="tab-panel hidden" role="tabpanel">
+              <div class="feature-block">
+                <div class="logger-header">
+                  <div>
+                    <h3>Удалённые сообщения</h3>
+                    <p class="muted small">
+                      История удалений ботом за последние 48 часов: тишина, триггеры, команды и служебные.
+                    </p>
+                  </div>
+                  <button type="button" class="btn secondary" id="logger-refresh-btn">Обновить</button>
+                </div>
+
+                <div id="deletion-log-list" class="item-list"></div>
+                <p id="deletion-log-empty" class="muted empty-hint hidden">За 48 часов удалений не было.</p>
+              </div>
+            </div>
+            </div>
+          </section>
+
+          <section id="empty-panel" class="content card empty-panel">
+            <p>Выберите чат слева, чтобы управлять настройками</p>
+          </section>
+        </main>
+
+        <div id="toast" class="toast hidden"></div>
+      </section>
+    </div>
+
+    <script src="/app.js?v=22" type="module"></script>
+  </body>
+</html>

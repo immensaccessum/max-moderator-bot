@@ -1,0 +1,42 @@
+{
+  "name": "max-moderator-bot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "dev:insecure": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint src",
+    "pm2:start": "npm run build && pm2 start ecosystem.config.cjs",
+    "pm2:restart": "npm run build && pm2 restart max-moderator-bot",
+    "pm2:stop": "pm2 stop max-moderator-bot",
+    "pm2:logs": "pm2 logs max-moderator-bot"
+  },
+  "dependencies": {
+    "@maxhub/max-bot-api": "^0.2.4",
+    "better-sqlite3": "^12.11.1",
+    "cors": "^2.8.6",
+    "dotenv": "^16.4.7",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.10.0",
+    "eslint": "^9.39.2",
+    "globals": "^16.5.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.50.1",
+    "vitest": "^3.2.4"
+  }
+}
